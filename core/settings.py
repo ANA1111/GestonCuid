@@ -5,12 +5,12 @@ from pathlib import Path
 # 1. Caminho Base
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 2. Segurança
+# 2. Segurança (Lido da Render)
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-chave-temporaria')
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = ['*']
 
-# 3. Apps e Middleware
+# 3. Aplicativos
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'cuidadores',
 ]
 
+# 4. Middleware (WhiteNoise deve ser o segundo da lista)
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -32,18 +33,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# --- ESSA LINHA ABAIXO É A QUE ESTÁ FALTANDO NO SEU LOG ---
 ROOT_URLCONF = 'core.urls'
-WSGI_APPLICATION = 'core.wsgi.application'
+# ---------------------------------------------------------
 
-# 4. BANCO DE DADOS (Configuração Inteligente)
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}",
-        conn_max_age=600
-    )
-}
-
-# 5. Templates
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -60,13 +53,23 @@ TEMPLATES = [
     },
 ]
 
+WSGI_APPLICATION = 'core.wsgi.application'
+
+# 5. Banco de Dados
+DATABASES = {
+    'default': dj_database_url.config(
+        default=f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}",
+        conn_max_age=600
+    )
+}
+
 # 6. Internacionalização
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_TZ = True
 
-# 7. Arquivos Estáticos e Mídia
+# 7. Arquivos Estáticos (WhiteNoise)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
