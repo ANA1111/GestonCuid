@@ -1,16 +1,15 @@
 import os
-import dj_database_url
 from pathlib import Path
 
 # 1. Caminho Base
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 2. Segurança (Lido da Render)
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-chave-temporaria')
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+# 2. Configurações de Segurança para Desenvolvimento Local
+SECRET_KEY = 'django-insecure-chave-local-de-teste'
+DEBUG = True
 ALLOWED_HOSTS = ['*']
 
-# 3. Aplicativos
+# 3. Aplicativos Instalados
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -18,13 +17,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cuidadores',
+    'cuidadores',  # Seu app principal
 ]
 
-# 4. Middleware (WhiteNoise deve ser o segundo da lista)
+# 4. Middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -33,9 +31,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# --- ESSA LINHA ABAIXO É A QUE ESTÁ FALTANDO NO SEU LOG ---
+# 5. Roteamento de URLs
 ROOT_URLCONF = 'core.urls'
-# ---------------------------------------------------------
 
 TEMPLATES = [
     {
@@ -55,24 +52,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-# 5. Banco de Dados
+# 6. BANCO DE DADOS LOCAL (SQLite)
 DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}",
-        conn_max_age=600
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
-# 6. Internacionalização
+# 7. Internacionalização
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_TZ = True
 
-# 7. Arquivos Estáticos (WhiteNoise)
+# 8. Arquivos Estáticos e de Mídia (Uploads)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
