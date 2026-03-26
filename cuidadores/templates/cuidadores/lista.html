@@ -1,0 +1,137 @@
+{% extends 'cuidadores/base.html' %}
+
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+<style>
+    .filter-card { border: none; border-radius: 15px; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .table-card { border: none; border-radius: 15px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    .badge-status { font-size: 0.75rem; padding: 6px 12px; border-radius: 20px; }
+</style>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="bi bi-search-heart text-primary me-2"></i>Seleção de Profissionais</h2>
+        <a href="{% url 'exportar_excel' %}?{{ request.GET.urlencode }}" class="btn btn-success shadow-sm">
+            <i class="bi bi-file-earmark-excel me-1"></i> Exportar Resultados
+        </a>
+    </div>
+
+    <!-- PAINEL DE FILTROS -->
+    <div class="card filter-card p-4 mb-4">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Cidade</label>
+                <input type="text" name="cidade" class="form-control" placeholder="Ex: Salvador" value="{{ request.GET.cidade }}">
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Formação Técnica</label>
+                <select name="formacao" class="form-select">
+                    <option value="">Todas</option>
+                    <option value="Curso Cuidador (>80h)" {% if request.GET.formacao == "Curso Cuidador (>80h)" %}selected{% endif %}>Curso Cuidador (>80h)</option>
+                    <option value="Técnico/Aux Enfermagem" {% if request.GET.formacao == "Técnico/Aux Enfermagem" %}selected{% endif %}>Técnico/Aux Enfermagem</option>
+                    <option value="Experiência Prática" {% if request.GET.formacao == "Experiência Prática" %}selected{% endif %}>Apenas Prática</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">Situação MEI</label>
+                <select name="status_mei" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="Sim" {% if request.GET.status_mei == "Sim" %}selected{% endif %}>Possui MEI</option>
+                    <option value="Não" {% if request.GET.status_mei == "Não" %}selected{% endif %}>Não Possui</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">Capacitação</label>
+                <select name="capacitacao" class="form-select">
+                    <option value="">Todas</option>
+                    <option value="Banho de Leito" {% if request.GET.capacitacao == "Banho de Leito" %}selected{% endif %}>Banho de Leito</option>
+                    <option value="Sondas" {% if request.GET.capacitacao == "Sondas" %}selected{% endif %}>Sondas</option>
+                    <option value="Transferência" {% if request.GET.capacitacao == "Transferência" %}selected{% endif %}>Transferência</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100 fw-bold">
+                    <i class="bi bi-filter"></i> Filtrar
+                </button>
+            </div>
+        </form>
+        <div class="mt-2 text-end">
+            <a href="{% url 'lista' %}" class="text-decoration-none small text-muted">Limpar filtros</a>
+        </div>
+    </div>
+
+    <!-- TABELA DE RESULTADOS -->
+    <div class="card table-card overflow-hidden">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr class="small text-uppercase">
+                    <th class="ps-4">Candidato</th>
+                    <th>Localização</th>
+                    <th>Qualificação</th>
+                    <th>MEI</th>
+                    <th>Status Interno</th>
+                    <th class="text-center">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in cuidadores %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="fw-bold">{{ c.nome }}</div>
+                        <div class="text-muted small">{{ c.whatsapp }}</div>
+                    </td>
+                    <td>
+                        <span class="small">{{ c.cidade }} - {{ c.estado }}</span><br>
+                        <span class="text-muted extra-small">{{ c.bairro }}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-primary border border-primary-subtle">{{ c.formacao }}</span>
+                    </td>
+                    <td>
+                        {% if c.status_mei == "Sim" %}
+                            <i class="bi bi-check-circle-fill text-success" title="MEI Ativo"></i>
+                        {% else %}
+                            <i class="bi bi-x-circle text-muted" title="Sem MEI"></i>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if c.status == 'NOVO' %}
+                            <span class="badge-status bg-info-subtle text-info border border-info">Novo</span>
+                        {% elif c.status == 'APROVADO' %}
+                            <span class="badge-status bg-success-subtle text-success border border-success">Aprovado</span>
+                        {% elif c.status == 'REPROVADO' %}
+                            <span class="badge-status bg-danger-subtle text-danger border border-danger">Reprovado</span>
+                        {% else %}
+                            <span class="badge-status bg-warning-subtle text-warning border border-warning">Entrevista</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <div class="btn-group">
+                            <a href="https://wa.me/{{ c.whatsapp }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                <i class="bi bi-whatsapp"></i>
+                            </a>
+                            <a href="/admin/cuidadores/cuidador/{{ c.id }}/change/" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-person-exclamation fs-1 d-block mb-2"></i>
+                        Nenhum cuidador encontrado com esses critérios.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
